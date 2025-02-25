@@ -44,6 +44,17 @@ void AAuraPlayerController::SetupInputComponent()
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	const FVector2D MovementVector = InputActionValue.Get<FVector2D>();
 
-	
+	if (APawn* ControlledPawn = GetPawn<APawn>())
+	{
+		
+		const FRotator ControlRot = GetControlRotation();
+		const FRotator YawRotation(0.f, ControlRot.Yaw, 0.f);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		ControlledPawn->AddMovementInput(ForwardDirection, MovementVector.Y);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		ControlledPawn->AddMovementInput(RightDirection, MovementVector.X);
+	}
 }
