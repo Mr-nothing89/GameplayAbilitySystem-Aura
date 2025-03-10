@@ -4,10 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "AuraWidgetController.h"
+#include "GameplayTagContainer.h"
 #include "OverlayWidgetController.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature,float,NewValue);
+class UAuraUserWidget;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
+
+USTRUCT(BlueprintType)
+struct FUIWidgetRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FGameplayTag AssetTag = FGameplayTag();
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FText Message = FText();
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TSubclassOf<UAuraUserWidget> MessageWidget = nullptr;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UTexture2D* Image = nullptr;
+
+	
+};
 /**
  * 
  */
@@ -32,5 +54,19 @@ public:
 
 	UPROPERTY(BlueprintAssignable,Category="GAS|Attributes")
 	FOnAttributeChangedSignature OnMaxManaChanged;
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Widget Data")
+	TObjectPtr<UDataTable> MessageWidgetDataTable;
+
+	template<typename T>
+	T* GetDataTableRowByTag(UDataTable* DataTable,const FGameplayTag& Tag);
 	
 };
+
+template <typename T>
+T* UOverlayWidgetController::GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag)
+{
+	return DataTable->FindRow<T>(Tag.GetTagName(),TEXT(""));
+}
